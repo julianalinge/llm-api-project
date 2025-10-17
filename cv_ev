@@ -1,0 +1,275 @@
+import json
+import os
+
+# --- 0. Konfigurācija un Datu vietas (Jums to būs jāpielāgo) ---
+JD_FILE = "jd.txt"
+CV_FILES = ["cv1.txt", "cv2.txt", "cv3.txt"]
+OUTPUTS_DIR = "outputs"
+
+# Pārliecinieties, ka izvades direktorija pastāv
+os.makedirs(OUTPUTS_DIR, exist_ok=True)
+
+# --- 1. Darba apraksta un CV nolasīšana ---
+# Šī ir simulācija. Reālā lietojumā jums būs jālasa no failiem.
+# Aizvietojiet ar jūsu reālajiem failu saturiem.
+
+def read_file_content(filepath):
+    """Simulē faila satura nolasīšanu. Reālajā lietojumā izmantojiet ar atvērtu(filepath, 'r')."""
+    if filepath == JD_FILE:
+        return """
+    Mēs meklējam pieredzējušu Python izstrādātāju ar spēcīgām prasmēm mašīnmācībā un datu zinātnē.
+    Kandidātam jābūt pieredzei ar bibliotēkām, piemēram, TensorFlow, PyTorch un Scikit-learn.
+    Pieredze ar mākoņpakalpojumiem (AWS, Azure, GCP) un SQL datu bāzēm ir bonuss.
+    Nepieciešami 5+ gadu pieredze. Mēs novērtējam spēcīgas problēmu risināšanas prasmes un spēju strādāt komandā.
+    """
+    elif filepath == "cv1.txt":
+        return """
+        Kandidāts A:
+        Python izstrādātājs ar 7 gadu pieredzi. Specializējas datu analīzē un mašīnmācības modeļu izstrādē.
+        Pieredze ar Scikit-learn, TensorFlow. Strādājis ar AWS mākoņpakalpojumiem un PostgreSQL.
+        Spēcīgas programmēšanas un problēmu risināšanas prasmes. Iepriekšējā pieredze komandā.
+        """
+    elif filepath == "cv2.txt":
+        return """
+        Kandidāts B:
+        Jaunākais programmatūras inženieris ar 2 gadu pieredzi Python, Java.
+        Interesējas par mājas lapu izstrādi, izmanto Django un Flask.
+        Zināšanas par datu bāzēm, piemēram, MongoDB. Vēlas apgūt mašīnmācību. Nav tiešas pieredzes ar Scikit-learn vai TensorFlow.
+        """
+    elif filepath == "cv3.txt":
+        return """
+        Kandidāts C:
+        Datu zinātnieks ar 6 gadu pieredzi. Izcilas prasmes mašīnmācībā, dziļajā mācībā un dabiskās valodas apstrādē.
+        Izmantojis PyTorch un Keras. Pieredze ar liela apjoma datu apstrādi un Google Cloud Platform.
+        Prasmes SQL un NoSQL datu bāzēs. Pieredze komandas projektos.
+        """
+    return ""
+
+
+# Jums būs jāimportē un jāinicializē Gemini modelis šeit, piemēram:
+import google.generativeai as genai
+genai.configure(api_key="API_KEY")
+model = genai.GenerativeModel('gemini-2.5-flash') # Vai cits modelis
+
+# --- 2. Sagatavojiet failu prompt.md ar savu, oriģinālu Gemini promptu ---
+def generate_gemini_prompt(job_description, candidate_resume):
+    """
+    Ģenerē Gemini promptu, lai salīdzinātu JD ar CV un ģenerētu JSON.
+    """
+    prompt = f"""
+    Esiet eksperts personāla atlases speciālists. Jūsu uzdevums ir rūpīgi analizēt doto Darba Aprakstu (JD) un Kandidāta CV.
+    Novērtējiet kandidāta atbilstības līmeni, pamatojoties uz šādiem kritērijiem:
+    1.  **Vispārējā atbilstība:** Kā kandidāta pieredze un prasmes atbilst JD. (Augsta, Vidēja, Zema)
+    2.  **Nepieciešamās Prasmes:** Galveno prasmju (piemēram, Python, Mašīnmācība, TensorFlow, PyTorch, Scikit-learn, 5+ gadu pieredze) klātbūtne un līmenis.
+    3.  **Bonusa Prasmes:** Bonusa prasmju (piemēram, AWS, Azure, GCP, SQL) klātbūtne.
+    4.  **Atbilstības pamatojums:** Īss skaidrojums, kāpēc kandidāts atbilst vai neatbilst JD.
+    5.  **Ieteikums:** Vai kandidāts ir jāvirza uz interviju? (Jā/Nē)
+    6.  **Komentāri:** Īsi papildu komentāri, ja nepieciešams.
+
+    Sniedziet savu novērtējumu JSON formātā, kā parādīts zemāk. Nodrošiniet, ka JSON ir derīgs un atbilst specifikācijai.
+
+    
+
+    {job_description}
+
+
+    {candidate_resume}
+    ```
+
+    JSON izvades formāts (stingri ievērojiet šo struktūru):
+    ```json
+    {{
+      "candidate_id": "CV ID (piemēram, cv1)",
+      "overall_match_level": "Augsta/Vidēja/Zema",
+      "required_skills_match": {{
+        "Python": "Yes/No/Partial",
+        "Machine Learning": "Yes/No/Partial",
+        "TensorFlow": "Yes/No/Partial",
+        "PyTorch": "Yes/No/Partial",
+        "Scikit-learn": "Yes/No/Partial",
+        "Experience_5_plus_years": "Yes/No"
+      }},
+      "bonus_skills_match": {{
+        "AWS": "Yes/No",
+        "Azure": "Yes/No",
+        "GCP": "Yes/No",
+        "SQL": "Yes/No"
+      }},
+      "match_justification": "Skaidrojums par atbilstību.",
+      "recommend_for_interview": "Yes/No",
+      "comments": "Papildu komentāri par kandidātu."
+    }}
+    ```
+    """
+    
+    return prompt
+
+
+
+# Saglabājiet prompt.md failu
+with open(os.path.join(OUTPUTS_DIR, "prompt.md"), "w", encoding="utf-8") as f:
+    f.write(generate_gemini_prompt("Simulēts JD", "Simulēts CV")) # Rakstiet vispārīgu promptu
+
+
+# --- 3. Izsauciet Gemini Flash 2.5 (temperature ≤ 0.3) un lūdziet rezultātu JSON formātā ---
+def call_gemini_api(prompt_text, candidate_id):
+    """
+    Šī funkcija simulē Gemini API izsaukumu.
+    JUMS BŪS JĀAIZVIETO ŠĪ DAĻA ar reālo Gemini API integrāciju.
+    Izmantojiet `model.generate_content(prompt_text, generation_config=genai.GenerationConfig(temperature=0.1))`
+
+    Atgriež simulētu JSON atbildi.
+    """
+    print(f"Simulē Gemini API izsaukumu kandidātam: {candidate_id}...")
+
+    # Šeit jūs varat ievietot loģiku, kas simulē Gemini atbildi
+    # Reālajā lietojumā šeit būtu API izsaukums:
+    response = model.generate_content(prompt_text, generation_config=genai.GenerationConfig(temperature=0.1))
+    return json.loads(response.text) # Pārliecinieties, ka modelis atgriež tīru JSON
+
+    
+    if candidate_id == "cv1":
+        return {
+            "candidate_id": "cv1",
+            "overall_match_level": "Augsta",
+            "required_skills_match": {
+                "Python": "Yes",
+                "Machine Learning": "Yes",
+                "TensorFlow": "Yes",
+                "PyTorch": "No",
+                "Scikit-learn": "Yes",
+                "Experience_5_plus_years": "Yes"
+            },
+            "bonus_skills_match": {
+                "AWS": "Yes",
+                "Azure": "No",
+                "GCP": "No",
+                "SQL": "Yes"
+            },
+            "match_justification": "Kandidātam ir 7 gadu pieredze Python izstrādē ar specializāciju ML un datu analīzē, kas atbilst JD prasībām. Ir pieredze ar TensorFlow, Scikit-learn, AWS un PostgreSQL (SQL).",
+            "recommend_for_interview": "Yes",
+            "comments": "Ļoti atbilstošs kandidāts ar nepieciešamo pieredzi."
+        }
+    elif candidate_id == "cv2":
+        return {
+            "candidate_id": "cv2",
+            "overall_match_level": "Zema",
+            "required_skills_match": {
+                "Python": "Yes",
+                "Machine Learning": "No",
+                "TensorFlow": "No",
+                "PyTorch": "No",
+                "Scikit-learn": "No",
+                "Experience_5_plus_years": "No"
+            },
+            "bonus_skills_match": {
+                "AWS": "No",
+                "Azure": "No",
+                "GCP": "No",
+                "SQL": "No"
+            },
+            "match_justification": "Kandidātam ir tikai 2 gadu pieredze un interese par web izstrādi, kas neatbilst JD prasītajai 5+ gadu pieredzei un ML specializācijai. Nav minētas galvenās ML bibliotēkas.",
+            "recommend_for_interview": "No",
+            "comments": "Nav atbilstošs šai pozīcijai pašreizējā stadijā."
+        }
+    elif candidate_id == "cv3":
+        return {
+            "candidate_id": "cv3",
+            "overall_match_level": "Augsta",
+            "required_skills_match": {
+                "Python": "Partial", # Datu zinātnieks parasti izmanto Python
+                "Machine Learning": "Yes",
+                "TensorFlow": "No", # Minēts PyTorch un Keras, bet ne TensorFlow tieši
+                "PyTorch": "Yes",
+                "Scikit-learn": "Partial", # Netieši, jo Datu zinātnieks
+                "Experience_5_plus_years": "Yes"
+            },
+            "bonus_skills_match": {
+                "AWS": "No",
+                "Azure": "No",
+                "GCP": "Yes",
+                "SQL": "Yes"
+            },
+            "match_justification": "Kandidātam ir 6 gadu pieredze datu zinātnē ar spēcīgām ML un DL prasmēm (PyTorch, Keras). Pieredze ar GCP un SQL ir bonuss. Tomēr nav tieši minēts TensorFlow vai Scikit-learn.",
+            "recommend_for_interview": "Yes",
+            "comments": "Spēcīgs kandidāts, bet vēlams precizēt pieredzi ar TensorFlow/Scikit-learn."
+        }
+    return {} # Tukša atbilde kļūdas gadījumā
+
+# --- 5. Ģenerējiet īsu pārskatu (Markdown) no JSON ---
+
+def generate_report_markdown(json_data):
+    """
+    Ģenerē Markdown pārskatu no JSON datiem.
+    """
+    if not json_data:
+        return "Nav pieejami dati pārskatam."
+
+    report = f"# Kandidāta Atbilstības Pārskats: {json_data['candidate_id']}\n\n"
+    report += f"## Vispārējais Novērtējums\n"
+    report += f"- **Vispārējā atbilstības līmenis:** {json_data['overall_match_level']}\n"
+    report += f"- **Ieteikums intervijai:** {json_data['recommend_for_interview']}\n\n"
+
+    report += f"## Nepieciešamo Prasmju Atbilstība\n"
+    for skill, match in json_data['required_skills_match'].items():
+        report += f"- **{skill.replace('_', ' ').title()}:** {match}\n"
+    report += "\n"
+
+    report += f"## Bonusa Prasmju Atbilstība\n"
+    for skill, match in json_data['bonus_skills_match'].items():
+        report += f"- **{skill.upper()}:** {match}\n"
+    report += "\n"
+
+    report += f"## Atbilstības Pamatojums\n"
+    report += f"{json_data['match_justification']}\n\n"
+
+    if json_data.get('comments'):
+        report += f"## Papildu Komentāri\n"
+        report += f"{json_data['comments']}\n"
+
+    return report
+
+# --- Galvenā izpildes loģika ---
+if __name__ == "__main__":
+    job_description = read_file_content(JD_FILE)
+    if not job_description:
+        print(f"Kļūda: Nevarēja nolasīt JD no {JD_FILE}")
+    else:
+        print(f"JD nolasīts ({len(job_description)} rakstzīmes).")
+
+    for i, cv_file in enumerate(CV_FILES):
+        candidate_id = f"cv{i+1}"
+        candidate_resume = read_file_content(cv_file)
+
+        if not candidate_resume:
+            print(f"Kļūda: Nevarēja nolasīt CV no {cv_file}")
+            continue
+
+        print(f"\nApstrādā kandidātu {candidate_id} no {cv_file}...")
+
+        # 2. un 3. soli: Ģenerējiet promptu un simulējiet Gemini izsaukumu
+        full_prompt = generate_gemini_prompt(job_description, candidate_resume)
+        # Šeit jums BŪTU jāizsauc Gemini API:
+        gemini_response_json = model.generate_content(full_prompt, generation_config=genai.GenerationConfig(temperature=0.1)).text
+        parsed_json_response = json.loads(gemini_response_json)
+        
+        # Bet mēs izmantojam simulāciju:
+        parsed_json_response = call_gemini_api(full_prompt, candidate_id)
+
+        if parsed_json_response:
+            # 4. Saglabājiet modeļa atbildi kā outputs/cvN.json
+            output_json_path = os.path.join(OUTPUTS_DIR, f"{candidate_id}.json")
+            with open(output_json_path, "w", encoding="utf-8") as f:
+                json.dump(parsed_json_response, f, indent=2, ensure_ascii=False)
+            print(f"Saglabāta Gemini atbilde: {output_json_path}")
+
+            # 5. Ģenerējiet īsu pārskatu (Markdown)
+            report_markdown = generate_report_markdown(parsed_json_response)
+            output_report_path = os.path.join(OUTPUTS_DIR, f"{candidate_id}_report.md")
+            with open(output_report_path, "w", encoding="utf-8") as f:
+                f.write(report_markdown)
+            print(f"Saglabāts pārskats: {output_report_path}")
+        else:
+            print(f"Nevarēja ģenerēt JSON atbildi kandidātam {candidate_id}.")
+
+    print("\nVisas apstrādes pabeigtas.")

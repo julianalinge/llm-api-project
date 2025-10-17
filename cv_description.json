@@ -1,0 +1,72 @@
+ [ {
+      "candidate_id": "CV ID (cv1)",
+      "overall_match_level": "Augsta",
+      "required_skills_match": {
+        "Python": "Yes",
+        "Machine Learning": "Yes",
+        "TensorFlow": "Yes",
+        "PyTorch": "No",
+        "Scikit-learn": "Yes",
+        "Experience5plusyears": "Yes"
+      },
+      "bonus_skills_match": {
+        "AWS": "Yes",
+        "Azure": "No",
+        "GCP": "No",
+        "SQL": "Yes"
+      },
+      "match_justification": "Atbild prasībam.",
+      "recommend_for_interview": "Yes",
+      "comments": "Papildu komentāri par kandidātu."},
+  {
+
+      "candidate_id": "CV ID (cv2)",
+      "overall_match_level": "Vidēja",
+      "required_skills_match": {
+        "Python": "Yes",
+        "Machine Learning": "Yes",
+        "TensorFlow": "No",
+        "PyTorch": "Yes",
+        "Scikit-learn": "No",
+        "Experience5plusyears": "No"
+      },
+      "bonus_skills_match": {
+        "AWS": "No",
+        "Azure": "No",
+        "GCP": "No",
+        "SQL": "No"
+      },
+      "match_justification": "Skaidrojums par atbilstību.",
+      "recommend_for_interview": "Yes",
+      "comments": "Papildu komentāri par kandidātu."
+  },
+  {
+
+      "candidate_id": "CV ID (cv3)",
+      "overall_match_level": "Vidēja",
+      "required_skills_match": {
+        "Python": "Yes",
+        "Machine Learning": "Yes",
+        "TensorFlow": "No",
+        "PyTorch": "Yes",
+        "Scikit-learn": "No",
+        "Experience5plusyears": "Yes"
+      },
+      "bonus_skills_match": {
+        "AWS": "No",
+        "Azure": "No",
+        "GCP": "No",
+        "SQL": "Yes"
+      },
+      "match_justification": "Skaidrojums par atbilstību.",
+      "recommend_for_interview": "Yes",
+      "comments": "Pieredze komandu projektos."
+  }
+]
+    
+    
+  
+
+ 
+
+  
